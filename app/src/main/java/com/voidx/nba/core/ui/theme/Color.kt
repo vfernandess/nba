@@ -1,4 +1,4 @@
-package com.voidx.nba.ui.theme
+package com.voidx.nba.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
