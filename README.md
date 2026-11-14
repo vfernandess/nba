@@ -30,6 +30,9 @@ kotlinx.serialization, Coroutines/Flow, NDK (API key), JUnit4 + Turbine.
 
    `BALLDONTLIE_BASE_URL` can be set the same way. It defaults to `https://api.balldontlie.io/v1/`.
 
+   `local.properties` is parsed by `java.util.Properties`, so a backslash in a value is an escape
+   character and must be doubled.
+
 The key is read at **build time** only. Without it the build still succeeds and logs a warning,
 and the app shows an "API key missing" error.
 
@@ -133,7 +136,8 @@ that delegates to a stateless, previewable `XxxPageContent`.
 - **Newest season first, walking back.** The games endpoint can't sort by date. The sheet starts
   at the current season (the current year from October onward, otherwise the previous year) and
   follows `next_cursor` to the end of that season. Then it moves to the season before, and so on.
-  A season with no games is skipped within the same load. Paging stops at 1946 or **after 3
+  A season with no games, or an empty later page of a season, is skipped within the same load,
+  so a short or empty page never stalls the endless scroll. Paging stops at 1946 or **after 3
   empty seasons in a row**, so a 1990s expansion team doesn't spend about 50 requests walking
   back to 1946. Three empty seasons still tolerates gaps such as Charlotte's 2002–2004 hiatus.
   Games are fetched 100 per page. Games not yet played show "–" instead of 0–0.
@@ -145,7 +149,8 @@ that delegates to a stateless, previewable `XxxPageContent`.
   few calls: one request for all teams, loads from the ViewModel's `init` (so returning to a tab
   doesn't refetch), the search debounce, the 2-character minimum and 100 games per page. Ktor
   retries 429 and 5xx responses up to 2 times with exponential backoff, and never retries
-  exceptions. If the limit is still hit, the app shows a distinct "rate limited" error with
+  exceptions. Those retries wait only about 2 s and then 4 s, so they rarely help against a
+  per-minute limit; once they are used up, the app shows a distinct "rate limited" error with
   Retry.
 - **Scope.** No images, offline cache, analytics or multi-module split. Tests are JVM unit tests
   of reducers, use cases, interactors and ViewModels (Turbine, fakes, no mocking library), plus
