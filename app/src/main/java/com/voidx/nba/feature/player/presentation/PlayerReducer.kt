@@ -30,7 +30,12 @@ abstract class PlayerReducer : SimpleReducer<PlayerState, PlayerEffect>(PlayerSt
 
                 is PlayerEffect.ShowPage -> {
                     val current = (currentState.content as? ContentState.Success)?.data
-                    val players = if (effect.append && current != null) current + effect.players else effect.players
+                    // distinctBy: a duplicated page must never crash the list's `key = { it.id }`.
+                    val players = if (effect.append && current != null) {
+                        (current + effect.players).distinctBy { it.id }
+                    } else {
+                        effect.players
+                    }
                     // A first page always belongs to the query being searched: a newer search cancels older jobs.
                     currentState.copy(
                         content = ContentState.Success(players),

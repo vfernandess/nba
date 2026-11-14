@@ -12,7 +12,10 @@ import com.voidx.nba.feature.player.business.PlayerViewModel
 import com.voidx.nba.feature.player.presentation.PlayerCommand
 import com.voidx.nba.feature.player.presentation.PlayerSideEffect
 import com.voidx.nba.feature.player.presentation.SEARCH_JOB_KEY
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.withIndex
 
 @Composable
 fun PlayerPage(
@@ -22,10 +25,9 @@ fun PlayerPage(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val searchState = rememberTextFieldState(initialText = state.query)
 
-    // drop(1): the initial emission is the restored text, so returning to the tab must not re-search.
     LaunchedEffect(searchState) {
         snapshotFlow { searchState.text.toString() }
-            .drop(1)
+            .searchesToDispatch { viewModel.state.value.query }
             .collect { viewModel.dispatch(PlayerCommand.Search(it), SEARCH_JOB_KEY) }
     }
 
@@ -43,3 +45,13 @@ fun PlayerPage(
         onPlayerClick = { viewModel.dispatch(PlayerCommand.SelectPlayer(it)) },
     )
 }
+
+/**
+ * The first emission is the restored field text: skip it when the ViewModel already holds it
+ * (rotation, tab return) but search it after process death, where the new ViewModel's query is empty.
+ * Later edits always search.
+ */
+internal fun Flow<String>.searchesToDispatch(currentQuery: () -> String): Flow<String> =
+    withIndex()
+        .filter { (index, text) -> index > 0 || text != currentQuery() }
+        .map { it.value }

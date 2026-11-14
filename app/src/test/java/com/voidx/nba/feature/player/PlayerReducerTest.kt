@@ -131,6 +131,14 @@ class PlayerReducerTest {
     }
 
     @Test
+    fun showPage_append_dropsPlayersAlreadyShown() {
+        reducer(PlayerEffect.ShowPage(first, 25, append = false))
+        reducer(PlayerEffect.ShowPage(first.takeLast(1) + second, 50, append = true))
+
+        assertEquals(ContentState.Success(first + second), reducer.state.value.content)
+    }
+
+    @Test
     fun showNoResults_setsNoResultsContent() {
         reducer(PlayerEffect.ShowNoResults("zzz"))
 

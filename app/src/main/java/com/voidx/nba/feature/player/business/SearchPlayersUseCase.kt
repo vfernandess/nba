@@ -22,21 +22,22 @@ interface SearchPlayersUseCase {
         override fun invoke(query: String, cursor: Int?): Flow<PlayerEffect> = flow {
             val isFirstPage = cursor == null
             emit(if (isFirstPage) PlayerEffect.Loading else PlayerEffect.LoadingMore)
+            emit(load(query, cursor, isFirstPage))
+        }
+
+        private suspend fun load(query: String, cursor: Int?, isFirstPage: Boolean): PlayerEffect =
             try {
                 val page = repository.searchPlayers(query, cursor, PLAYERS_PER_PAGE)
                 if (isFirstPage && page.items.isEmpty()) {
-                    emit(PlayerEffect.ShowNoResults(query))
+                    PlayerEffect.ShowNoResults(query)
                 } else {
-                    emit(PlayerEffect.ShowPage(page.items, page.nextCursor, append = !isFirstPage))
+                    PlayerEffect.ShowPage(page.items, page.nextCursor, append = !isFirstPage)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 val error = (e as? AppException)?.error ?: AppError.Unknown
-                emit(
-                    if (isFirstPage) PlayerEffect.ShowError(error) else PlayerEffect.ShowLoadMoreError(error),
-                )
+                if (isFirstPage) PlayerEffect.ShowError(error) else PlayerEffect.ShowLoadMoreError(error)
             }
-        }
     }
 }
