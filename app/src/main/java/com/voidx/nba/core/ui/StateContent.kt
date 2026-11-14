@@ -5,16 +5,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voidx.nba.R
+import com.voidx.nba.core.ui.theme.NBATheme
 
 @Composable
 fun <T> StateContent(
@@ -30,11 +40,19 @@ fun <T> StateContent(
         }
 
         is ContentState.Empty -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                text = emptyMessage(state.reason),
-                textAlign = TextAlign.Center,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(16.dp),
-            )
+            ) {
+                Icon(
+                    imageVector = state.reason.icon(),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(48.dp),
+                )
+                Text(text = emptyMessage(state.reason), textAlign = TextAlign.Center)
+            }
         }
 
         is ContentState.Error -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -50,4 +68,35 @@ fun <T> StateContent(
 
         is ContentState.Success -> Box(modifier) { success(state.data) }
     }
+}
+
+private fun EmptyReason.icon(): ImageVector =
+    when (this) {
+        EmptyReason.Prompt -> Icons.Filled.Search
+        EmptyReason.NoData, is EmptyReason.NoResults -> Icons.Filled.Info
+    }
+
+@Composable
+private fun EmptyPreview(reason: EmptyReason, message: String) {
+    NBATheme(dynamicColor = false) {
+        Surface {
+            StateContent<Unit>(
+                state = ContentState.Empty(reason),
+                onRetry = {},
+                emptyMessage = { message },
+            ) {}
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StateContentEmptyPromptPreview() {
+    EmptyPreview(EmptyReason.Prompt, "Type at least 2 characters to search.")
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StateContentEmptyNoDataPreview() {
+    EmptyPreview(EmptyReason.NoData, "No games found for this team.")
 }
