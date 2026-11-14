@@ -3,6 +3,7 @@ package com.voidx.nba.feature.home
 import app.cash.turbine.test
 import com.voidx.nba.core.common.AppError
 import com.voidx.nba.core.ui.ContentState
+import com.voidx.nba.core.ui.EmptyReason
 import com.voidx.nba.domain.model.TeamSort
 import com.voidx.nba.feature.home.business.GetTeamsUseCase
 import com.voidx.nba.feature.home.business.SortTeamsUseCase
@@ -38,17 +39,30 @@ class HomeInteractorTest {
     }
 
     @Test
-    fun selectSort_whileLoading_emitsSortChangedWithoutTeams() = runTest {
+    fun selectSort_ignoredWhileLoading() = runTest {
         val effects = interactor(HomeState(), HomeCommand.SelectSort(TeamSort.City)).toList()
 
-        assertEquals(listOf<HomeEffect>(HomeEffect.SortChanged(TeamSort.City, null)), effects)
+        assertEquals(emptyList<HomeEffect>(), effects)
+    }
+
+    @Test
+    fun selectSort_whenErrorOrEmpty_emitsSortChangedWithoutTeams() = runTest {
+        val errorState = HomeState(content = ContentState.Error(AppError.Network))
+        val emptyState = HomeState(content = ContentState.Empty(EmptyReason.NoData))
+
+        listOf(errorState, emptyState).forEach { state ->
+            val effects = interactor(state, HomeCommand.SelectSort(TeamSort.City)).toList()
+
+            assertEquals(listOf<HomeEffect>(HomeEffect.SortChanged(TeamSort.City, null)), effects)
+        }
     }
 
     @Test
     fun selectTeam_emitsOpenTeamSideEffect() = runTest {
         interactor.sideEffect.test {
-            interactor(loadedState, HomeCommand.SelectTeam(hawks)).toList()
+            val effects = interactor(loadedState, HomeCommand.SelectTeam(hawks)).toList()
 
+            assertEquals(listOf<HomeEffect>(HomeEffect.TeamSelected(hawks)), effects)
             assertEquals(HomeSideEffect.OpenTeam(1, "Atlanta Hawks"), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }

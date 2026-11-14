@@ -26,12 +26,15 @@ abstract class HomeInteractor :
                     getTeamsUseCase(state.sort)
 
                 is HomeCommand.SelectSort ->
-                    flowOf(HomeEffect.SortChanged(command.sort, state.sortedTeams(command)))
+                    if (state.content is ContentState.Loading) {
+                        emptyFlow()
+                    } else {
+                        flowOf(HomeEffect.SortChanged(command.sort, state.sortedTeams(command)))
+                    }
 
                 is HomeCommand.SelectTeam ->
-                    // SortChanged with the current sort and no teams is a no-op for the reducer.
                     flowOf(
-                        HomeEffect.SortChanged(state.sort, null) sendSideEffect
+                        HomeEffect.TeamSelected(command.team) sendSideEffect
                             HomeSideEffect.OpenTeam(command.team.id, command.team.fullName),
                     )
             }

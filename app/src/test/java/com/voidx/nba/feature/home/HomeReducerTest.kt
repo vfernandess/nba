@@ -64,4 +64,11 @@ class HomeReducerTest {
 
         assertEquals(HomeState(ContentState.Error(AppError.Network), TeamSort.City), result)
     }
+
+    @Test
+    fun teamSelected_leavesStateUnchanged() {
+        val state = HomeState(content = ContentState.Success(listOf(hawks)), sort = TeamSort.City)
+
+        assertEquals(state, reduce(HomeEffect.TeamSelected(hawks), state))
+    }
 }

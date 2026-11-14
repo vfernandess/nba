@@ -15,4 +15,6 @@ sealed class HomeEffect {
     data class ShowError(val error: AppError) : HomeEffect()
 
     data class SortChanged(val sort: TeamSort, val teams: List<Team>?) : HomeEffect()
+
+    data class TeamSelected(val team: Team) : HomeEffect()
 }

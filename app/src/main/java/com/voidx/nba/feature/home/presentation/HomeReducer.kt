@@ -28,6 +28,9 @@ abstract class HomeReducer : SimpleReducer<HomeState, HomeEffect>(HomeState()) {
                         sort = effect.sort,
                         content = effect.teams?.let { ContentState.Success(it) } ?: currentState.content,
                     )
+
+                is HomeEffect.TeamSelected ->
+                    currentState
             }
         }
     }
