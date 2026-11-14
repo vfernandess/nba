@@ -105,11 +105,12 @@ class PlayerInteractorTest {
     }
 
     @Test
-    fun loadMore_usesCursorAndTrimmedQuery() = runTest {
+    fun loadMore_usesCursorAndResultsQuery() = runTest {
         val more = listOf(testPlayer(3))
         repository.handler = { _, _, _ -> Page(more, nextCursor = null) }
         val state = PlayerState(
             query = " lebron ",
+            resultsQuery = "lebron",
             content = ContentState.Success(listOf(testPlayer(1))),
             nextCursor = 25,
         )
@@ -127,15 +128,20 @@ class PlayerInteractorTest {
     @Test
     fun loadMore_ignoredWhenLoadingOrEnded() = runTest {
         val results = ContentState.Success(listOf(testPlayer(1)))
-        val loading = PlayerState(query = "lebron", content = results, nextCursor = 25, isLoadingMore = true)
-        val ended = PlayerState(query = "lebron", content = results, nextCursor = null)
+        val loading = PlayerState(
+            query = "lebron", resultsQuery = "lebron", content = results, nextCursor = 25, isLoadingMore = true,
+        )
+        val ended = PlayerState(query = "lebron", resultsQuery = "lebron", content = results, nextCursor = null)
+        val staleQuery = PlayerState(query = "lebron", resultsQuery = "le", content = results, nextCursor = 25)
 
         val loadingEffects = collect(loading, PlayerCommand.LoadMore)
         val endedEffects = collect(ended, PlayerCommand.LoadMore)
+        val staleEffects = collect(staleQuery, PlayerCommand.LoadMore)
         runCurrent()
 
         assertTrue(loadingEffects.isEmpty())
         assertTrue(endedEffects.isEmpty())
+        assertTrue(staleEffects.isEmpty())
         assertEquals(0, repository.calls.size)
     }
 
@@ -143,9 +149,10 @@ class PlayerInteractorTest {
     fun selectPlayer_sendsOpenTeamSideEffect() = runTest {
         val player = testPlayer(7)
 
-        collect(PlayerState(), PlayerCommand.SelectPlayer(player))
+        val effects = collect(PlayerState(query = "le"), PlayerCommand.SelectPlayer(player))
         runCurrent()
 
+        assertEquals(listOf<PlayerEffect>(PlayerEffect.PlayerSelected(player)), effects)
         assertEquals(
             PlayerSideEffect.OpenTeam(player.team.id, player.team.fullName),
             interactor.sideEffect.first(),

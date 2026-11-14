@@ -12,6 +12,7 @@ import com.voidx.nba.feature.player.presentation.SEARCH_JOB_KEY
 import com.voidx.nba.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -35,7 +36,7 @@ class PlayerViewModelTest {
     )
 
     @Test
-    fun loadMore_isCancelledByNewSearch() = runTest(rule.dispatcher) {
+    fun loadMore_cancelledBySearch() = runTest(rule.dispatcher) {
         val lePage1 = listOf(testPlayer(1, "Le", "One"))
         val lePage2 = listOf(testPlayer(2, "Le", "Two"))
         val lebron = listOf(testPlayer(3, "LeBron", "James"))
@@ -80,5 +81,50 @@ class PlayerViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("lebr"), repository.calls.map { it.query })
+    }
+
+    @Test
+    fun duplicateReachedEnd_doesNotCancelInFlightLoadMore() = runTest(rule.dispatcher) {
+        val page1 = listOf(testPlayer(1))
+        val page2 = listOf(testPlayer(2))
+        repository.handler = { _, _, _ ->
+            delay(1_000)
+            Page(page2, nextCursor = null)
+        }
+        val reducer = PlayerReducer.Impl()
+        reducer(PlayerEffect.QueryChanged("le"))
+        reducer(PlayerEffect.ShowPage(page1, nextCursor = 25, append = false))
+        val vm = viewModel(reducer)
+
+        vm.onReachedEnd()
+        runCurrent()
+        assertEquals(true, vm.state.value.isLoadingMore)
+        vm.onReachedEnd()
+        advanceUntilIdle()
+
+        val state = vm.state.value
+        assertEquals(ContentState.Success(page1 + page2), state.content)
+        assertFalse(state.isLoadingMore)
+        assertEquals(1, repository.calls.size)
+    }
+
+    @Test
+    fun reachedEndDuringDebounce_doesNotCancelPendingSearch() = runTest(rule.dispatcher) {
+        val lePage1 = listOf(testPlayer(1, "Le", "One"))
+        val lebron = listOf(testPlayer(3, "LeBron", "James"))
+        repository.handler = { _, _, _ -> Page(lebron, nextCursor = null) }
+        val reducer = PlayerReducer.Impl()
+        reducer(PlayerEffect.QueryChanged("le"))
+        reducer(PlayerEffect.ShowPage(lePage1, nextCursor = 25, append = false))
+        val vm = viewModel(reducer)
+
+        vm.dispatch(PlayerCommand.Search("lebron"), SEARCH_JOB_KEY)
+        runCurrent()
+        advanceTimeBy(100)
+        vm.onReachedEnd()
+        advanceUntilIdle()
+
+        assertEquals(ContentState.Success(lebron), vm.state.value.content)
+        assertEquals(listOf(null to "lebron"), repository.calls.map { it.cursor to it.query })
     }
 }

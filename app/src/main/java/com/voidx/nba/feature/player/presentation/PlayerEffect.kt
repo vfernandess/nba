@@ -24,4 +24,7 @@ sealed class PlayerEffect {
     data class ShowError(val error: AppError) : PlayerEffect()
 
     data class ShowLoadMoreError(val error: AppError) : PlayerEffect()
+
+    /** Carrier for the OpenTeam side effect; the reducer ignores it. */
+    data class PlayerSelected(val player: Player) : PlayerEffect()
 }

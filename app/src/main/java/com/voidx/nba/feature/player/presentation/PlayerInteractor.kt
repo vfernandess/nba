@@ -1,7 +1,6 @@
 package com.voidx.nba.feature.player.presentation
 
 import com.voidx.nba.core.fuse.SideEffectInteractor
-import com.voidx.nba.core.ui.ContentState
 import com.voidx.nba.feature.player.business.SearchPlayersUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +22,7 @@ abstract class PlayerInteractor :
                 is PlayerCommand.Search -> search(command.query)
                 PlayerCommand.Retry -> searchNow(state.query)
                 PlayerCommand.LoadMore -> loadMore(state)
-                is PlayerCommand.SelectPlayer -> selectPlayer(state, command)
+                is PlayerCommand.SelectPlayer -> selectPlayer(command)
             }
 
         // Cancelling this flow (a newer Search/LoadMore/Retry shares SEARCH_JOB_KEY) is the debounce.
@@ -49,19 +48,17 @@ abstract class PlayerInteractor :
 
         private fun loadMore(state: PlayerState): Flow<PlayerEffect> {
             val cursor = state.nextCursor
-            val hasResults = state.content is ContentState.Success
-            return if (cursor == null || state.isLoadingMore || !hasResults) {
+            return if (cursor == null || !state.canLoadMore()) {
                 emptyFlow()
             } else {
-                searchPlayers(state.query.trim(), cursor)
+                searchPlayers(state.resultsQuery, cursor)
             }
         }
 
-        // The side effect needs an effect to ride on; re-emitting the current query is a no-op for the reducer.
-        private fun selectPlayer(state: PlayerState, command: PlayerCommand.SelectPlayer): Flow<PlayerEffect> {
+        private fun selectPlayer(command: PlayerCommand.SelectPlayer): Flow<PlayerEffect> {
             val team = command.player.team
             return flowOf(
-                PlayerEffect.QueryChanged(state.query) sendSideEffect
+                PlayerEffect.PlayerSelected(command.player) sendSideEffect
                     PlayerSideEffect.OpenTeam(team.id, team.fullName),
             )
         }

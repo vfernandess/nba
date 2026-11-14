@@ -19,7 +19,10 @@ abstract class PlayerReducer : SimpleReducer<PlayerState, PlayerEffect>(PlayerSt
                 PlayerEffect.Loading -> currentState.firstPageOf(ContentState.Loading)
 
                 is PlayerEffect.ShowNoResults ->
-                    currentState.firstPageOf(ContentState.Empty(EmptyReason.NoResults(effect.query)))
+                    currentState.firstPageOf(
+                        ContentState.Empty(EmptyReason.NoResults(effect.query)),
+                        resultsQuery = effect.query,
+                    )
 
                 is PlayerEffect.ShowError -> currentState.firstPageOf(ContentState.Error(effect.error))
 
@@ -28,8 +31,10 @@ abstract class PlayerReducer : SimpleReducer<PlayerState, PlayerEffect>(PlayerSt
                 is PlayerEffect.ShowPage -> {
                     val current = (currentState.content as? ContentState.Success)?.data
                     val players = if (effect.append && current != null) current + effect.players else effect.players
+                    // A first page always belongs to the query being searched: a newer search cancels older jobs.
                     currentState.copy(
                         content = ContentState.Success(players),
+                        resultsQuery = if (effect.append) currentState.resultsQuery else currentState.query.trim(),
                         nextCursor = effect.nextCursor,
                         isLoadingMore = false,
                         loadMoreError = null,
@@ -38,9 +43,17 @@ abstract class PlayerReducer : SimpleReducer<PlayerState, PlayerEffect>(PlayerSt
 
                 is PlayerEffect.ShowLoadMoreError ->
                     currentState.copy(isLoadingMore = false, loadMoreError = effect.error)
+
+                is PlayerEffect.PlayerSelected -> currentState
             }
 
-        private fun PlayerState.firstPageOf(content: ContentState<List<Player>>) =
-            copy(content = content, nextCursor = null, isLoadingMore = false, loadMoreError = null)
+        private fun PlayerState.firstPageOf(content: ContentState<List<Player>>, resultsQuery: String = "") =
+            copy(
+                content = content,
+                resultsQuery = resultsQuery,
+                nextCursor = null,
+                isLoadingMore = false,
+                loadMoreError = null,
+            )
     }
 }

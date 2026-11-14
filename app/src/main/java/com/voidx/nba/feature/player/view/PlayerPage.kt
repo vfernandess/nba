@@ -39,7 +39,7 @@ fun PlayerPage(
         state = state,
         searchState = searchState,
         onRetry = { viewModel.dispatch(PlayerCommand.Retry, SEARCH_JOB_KEY) },
-        onLoadMore = { viewModel.dispatch(PlayerCommand.LoadMore, SEARCH_JOB_KEY) },
+        onLoadMore = viewModel::onReachedEnd,
         onPlayerClick = { viewModel.dispatch(PlayerCommand.SelectPlayer(it)) },
     )
 }

@@ -31,6 +31,53 @@ class PlayerReducerTest {
     }
 
     @Test
+    fun showPage_firstPage_setsResultsQueryToTrimmedQuery() {
+        reducer(PlayerEffect.QueryChanged(" le "))
+        reducer(PlayerEffect.ShowPage(first, 25, append = false))
+
+        assertEquals("le", reducer.state.value.resultsQuery)
+    }
+
+    @Test
+    fun showPage_append_keepsResultsQuery() {
+        reducer(PlayerEffect.QueryChanged("le"))
+        reducer(PlayerEffect.ShowPage(first, 25, append = false))
+        reducer(PlayerEffect.QueryChanged("leb"))
+        reducer(PlayerEffect.ShowPage(second, null, append = true))
+
+        assertEquals("le", reducer.state.value.resultsQuery)
+    }
+
+    @Test
+    fun showNoResults_setsResultsQuery() {
+        reducer(PlayerEffect.ShowNoResults("zzz"))
+
+        assertEquals("zzz", reducer.state.value.resultsQuery)
+    }
+
+    @Test
+    fun promptLoadingAndError_resetResultsQuery() {
+        listOf(PlayerEffect.ShowPrompt, PlayerEffect.Loading, PlayerEffect.ShowError(AppError.Network)).forEach {
+            reducer(PlayerEffect.QueryChanged("le"))
+            reducer(PlayerEffect.ShowPage(first, 25, append = false))
+            reducer(it)
+
+            assertEquals("", reducer.state.value.resultsQuery)
+        }
+    }
+
+    @Test
+    fun playerSelected_leavesStateUnchanged() {
+        reducer(PlayerEffect.QueryChanged("le"))
+        reducer(PlayerEffect.ShowPage(first, 25, append = false))
+        val before = reducer.state.value
+
+        reducer(PlayerEffect.PlayerSelected(first.first()))
+
+        assertEquals(before, reducer.state.value)
+    }
+
+    @Test
     fun showPrompt_setsPromptContent() {
         reducer(PlayerEffect.ShowPage(first, 25, append = false))
         reducer(PlayerEffect.ShowPrompt)
