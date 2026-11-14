@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.IOException
@@ -120,6 +121,80 @@ class BallDontLieApiTest {
 
         assertError(AppError.MissingApiKey) { api.teams() }
         assertFalse(invoked)
+    }
+
+    @Test
+    fun status429Then200_retriesAndSucceeds() = runTest {
+        var calls = 0
+        val api = api {
+            calls++
+            if (calls == 1) respond("", HttpStatusCode.TooManyRequests) else emptyPage()
+        }
+
+        val page = api.teams()
+
+        assertEquals(2, calls)
+        assertTrue(page.data.isEmpty())
+    }
+
+    @Test
+    fun status429Always_retriesTwiceThenRateLimited() = runTest {
+        var calls = 0
+        val api = api {
+            calls++
+            respond("", HttpStatusCode.TooManyRequests)
+        }
+
+        assertError(AppError.RateLimited) { api.teams() }
+        assertEquals(3, calls)
+    }
+
+    @Test
+    fun status500Always_retriesTwiceThenUnknown() = runTest {
+        var calls = 0
+        val api = api {
+            calls++
+            respond("", HttpStatusCode.InternalServerError)
+        }
+
+        assertError(AppError.Unknown) { api.teams() }
+        assertEquals(3, calls)
+    }
+
+    @Test
+    fun status401_isNotRetried() = runTest {
+        var calls = 0
+        val api = api {
+            calls++
+            respond("", HttpStatusCode.Unauthorized)
+        }
+
+        assertError(AppError.Unauthorized) { api.teams() }
+        assertEquals(1, calls)
+    }
+
+    @Test
+    fun status404_isNotRetried() = runTest {
+        var calls = 0
+        val api = api {
+            calls++
+            respond("", HttpStatusCode.NotFound)
+        }
+
+        assertError(AppError.Unknown) { api.teams() }
+        assertEquals(1, calls)
+    }
+
+    @Test
+    fun ioException_isNotRetried() = runTest {
+        var calls = 0
+        val api = api {
+            calls++
+            throw IOException("offline")
+        }
+
+        assertError(AppError.Network) { api.teams() }
+        assertEquals(1, calls)
     }
 
     private suspend fun assertError(expected: AppError, block: suspend () -> Unit) {

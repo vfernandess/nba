@@ -33,6 +33,7 @@ object HttpClientFactory {
                 retryIf(maxRetries = MAX_RETRIES) { _, response ->
                     response.status.value == TOO_MANY_REQUESTS || response.status.value >= SERVER_ERROR_START
                 }
+                retryOnExceptionIf(maxRetries = MAX_RETRIES) { _, _ -> false }
                 exponentialDelay()
             }
             if (debug) {
