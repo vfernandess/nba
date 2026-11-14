@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_title">Players</string>
+    <string name="player_search_placeholder">Search by first or last name</string>
+    <string name="player_header_first_name">First Name</string>
+    <string name="player_header_last_name">Last Name</string>
+    <string name="player_header_team">Team</string>
+    <string name="player_empty_prompt">Search by first or last name</string>
+    <string name="player_empty_no_results">No players match \"%1$s\"</string>
+</resources>
