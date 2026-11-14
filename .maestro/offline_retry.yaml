@@ -1,0 +1,43 @@
+# Offline: with airplane mode on, Home shows the network error with Retry; once back online, Retry loads
+# the teams. Airplane mode is always switched off again, even when the flow fails.
+appId: com.voidx.nba
+name: offline_retry
+tags:
+  - network
+  - offline
+onFlowComplete:
+  - setAirplaneMode: disabled
+---
+- runFlow: common/cooldown.yaml
+
+- setAirplaneMode: enabled
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "No connection. Check your internet and try again."
+    timeout: 30000
+- assertVisible: "Retry"
+- assertNotVisible: "Atlanta Hawks"
+
+# Retry while still offline stays on the error state.
+- tapOn: "Retry"
+- extendedWaitUntil:
+    visible: "No connection. Check your internet and try again."
+    timeout: 30000
+
+- setAirplaneMode: disabled
+# The radio needs a few seconds to reconnect; an early Retry fails fast (no request reaches the API), so
+# retry until the teams appear.
+- retry:
+    maxRetries: 5
+    commands:
+      - runFlow:
+          when:
+            visible: "Retry"
+          commands:
+            - tapOn: "Retry"
+      - extendedWaitUntil:
+          visible: "Atlanta Hawks"
+          timeout: 10000
+- assertNotVisible: "Retry"
+- assertNotVisible: "No connection.*"

@@ -1,0 +1,39 @@
+# Bottom bar: switching tabs keeps each tab's list, scroll position and search query (no reload).
+appId: com.voidx.nba
+name: tab_state
+tags:
+  - network
+  - navigation
+---
+- runFlow: common/cooldown.yaml
+- runFlow: common/launch_home.yaml
+
+# Scroll Home to the end of the table.
+- scrollUntilVisible:
+    element: "Washington Wizards"
+    direction: DOWN
+    timeout: 20000
+- assertNotVisible: "Atlanta Hawks"
+
+# Search on Players.
+- tapOn: "Players"
+- runFlow: common/search_players.yaml
+
+# Home keeps its teams and scroll position.
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "Washington Wizards"
+    timeout: 5000
+- assertNotVisible: "Atlanta Hawks"
+
+# Players keeps the query and its results.
+- tapOn: "Players"
+- extendedWaitUntil:
+    visible: "First Name"
+    timeout: 5000
+- assertVisible: "james"
+- assertVisible: "James"
+- assertNotVisible:
+    text: "Search by first or last name"
+    below:
+      text: "james"

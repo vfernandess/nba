@@ -1,0 +1,22 @@
+# From the Players tab with an empty query: enter "james" and wait for the results table.
+appId: com.voidx.nba
+---
+# Maestro enters text one character at a time, and on a slow emulator the gap can exceed the 400 ms debounce,
+# so "ja"/"jam"/"jame" may each fire (and cancel) a request. await_content absorbs a resulting 429.
+# pasteText is used instead of inputText: with inputText, Gboard kept a suggestion banner up that hideKeyboard
+# could not dismiss, and the keyboard window then hid the results from Maestro.
+- setClipboard: "james"
+# The placeholder and the empty-state prompt share the same text; the field is the upper one.
+- tapOn:
+    text: "Search by first or last name"
+    above:
+      text: "Search by first or last name"
+- pasteText
+- runFlow:
+    file: await_content.yaml
+    env:
+      CONTENT: "First Name"
+- assertVisible: "Last Name"
+- assertVisible: "Team"
+- assertVisible: "James"
+- hideKeyboard

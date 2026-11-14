@@ -1,0 +1,99 @@
+# Home: the sort pill opens the Sort by dialog; each choice relabels the pill and re-orders the teams table.
+appId: com.voidx.nba
+name: home_sort
+tags:
+  - smoke
+  - network
+  - home
+---
+- runFlow: common/cooldown.yaml
+- runFlow: common/launch_home.yaml
+
+# The pill label repeats a column header ("Name" / "City" / "Conference"). The pill is the copy that sits
+# above another header cell, so "<label> above <other header>" only ever matches the pill.
+- assertVisible:
+    text: "Name"
+    above:
+      text: "City"
+- assertVisible: "Atlanta Hawks"
+- assertVisible: "Golden State Warriors"
+
+# City
+- tapOn:
+    text: "Name"
+    above:
+      text: "City"
+- extendedWaitUntil:
+    visible: "Sort by"
+    timeout: 5000
+- assertVisible: "Name"
+- assertVisible: "City"
+- assertVisible: "Conference"
+- tapOn: "City"
+- extendedWaitUntil:
+    visible:
+      text: "City"
+      above:
+        text: "Name"
+    timeout: 5000
+- assertNotVisible: "Sort by"
+- assertVisible:
+    text: "Atlanta Hawks"
+    above:
+      text: "Boston Celtics"
+- assertVisible:
+    text: "Atlanta"
+    rightOf:
+      text: "Atlanta Hawks"
+
+# Scroll down first: a new sort must bring the table back to the top.
+- swipe:
+    start: 50%, 80%
+    end: 50%, 20%
+- extendedWaitUntil:
+    notVisible: "Atlanta Hawks"
+    timeout: 5000
+
+# Conference: the 15 East teams come first, so West teams such as Golden State drop off the first screen.
+- tapOn:
+    text: "City"
+    above:
+      text: "Name"
+- extendedWaitUntil:
+    visible: "Sort by"
+    timeout: 5000
+- tapOn: "Conference"
+- extendedWaitUntil:
+    visible:
+      text: "Conference"
+      above:
+        text: "Name"
+    timeout: 5000
+- extendedWaitUntil:
+    visible: "Atlanta Hawks"
+    timeout: 5000
+- assertVisible:
+    text: "Cleveland Cavaliers"
+    above:
+      text: "Detroit Pistons"
+- assertNotVisible: "Golden State Warriors"
+- assertNotVisible: "Dallas Mavericks"
+
+# Back to Name: West teams are interleaved alphabetically again.
+- tapOn:
+    text: "Conference"
+    above:
+      text: "Name"
+- extendedWaitUntil:
+    visible: "Sort by"
+    timeout: 5000
+- tapOn: "Name"
+- extendedWaitUntil:
+    visible:
+      text: "Name"
+      above:
+        text: "City"
+    timeout: 5000
+- assertVisible: "Atlanta Hawks"
+- assertVisible: "Dallas Mavericks"
+- assertVisible: "Golden State Warriors"

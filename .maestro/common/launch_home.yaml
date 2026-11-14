@@ -1,0 +1,9 @@
+# Fresh launch on the Home tab, waiting until the teams table has loaded (1 API request).
+appId: com.voidx.nba
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: await_content.yaml
+    env:
+      CONTENT: "Atlanta Hawks"

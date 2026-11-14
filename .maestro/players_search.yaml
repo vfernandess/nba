@@ -1,0 +1,49 @@
+# Players: empty query shows the prompt; typing "james" (debounced) lists players; a player opens the
+# games sheet for their team with a "< Players" back button.
+appId: com.voidx.nba
+name: players_search
+tags:
+  - smoke
+  - network
+  - players
+  - game
+---
+- runFlow: common/cooldown.yaml
+- runFlow: common/launch_home.yaml
+
+- tapOn: "Players"
+# Empty query: the prompt sits below the search field, whose placeholder has the same text.
+- extendedWaitUntil:
+    visible:
+      text: "Search by first or last name"
+      below:
+        text: "Search by first or last name"
+    timeout: 5000
+- assertNotVisible: "First Name"
+
+- runFlow: common/search_players.yaml
+- assertNotVisible:
+    text: "Search by first or last name"
+    below:
+      text: "First Name"
+
+# Open the first result row (the "James" closest below the header).
+- tapOn:
+    text: "James"
+    below:
+      text: "First Name"
+- extendedWaitUntil:
+    visible: "< Players"
+    timeout: 10000
+# The team may be historical with no recent games, so accept either the games table or the empty state.
+- runFlow:
+    file: common/await_content.yaml
+    env:
+      CONTENT: "Visitor|No games found for this team."
+- assertNotVisible: "Too many requests.*"
+- tapOn: "< Players"
+- extendedWaitUntil:
+    notVisible: "< Players"
+    timeout: 5000
+- assertVisible: "First Name"
+- assertVisible: "james"

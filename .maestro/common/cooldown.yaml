@@ -1,0 +1,15 @@
+# The balldontlie free tier allows 5 requests per minute, and every flow below spends 1-5 of them.
+# Pause before each flow so the previous flow's requests leave the quota window.
+# Skip it with `maestro test -e COOLDOWN_SECONDS=0 ...` when the quota is known to be fresh.
+appId: com.voidx.nba
+---
+- runFlow:
+    when:
+      true: "${typeof COOLDOWN_SECONDS === 'undefined' || Number(COOLDOWN_SECONDS) > 0}"
+    commands:
+      # Maestro has no plain sleep: wait for an element that never exists, as an optional step.
+      - extendedWaitUntil:
+          visible:
+            id: "maestro-cooldown-never-visible"
+          timeout: "${(typeof COOLDOWN_SECONDS === 'undefined' ? 60 : Number(COOLDOWN_SECONDS)) * 1000}"
+          optional: true

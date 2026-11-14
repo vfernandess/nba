@@ -1,0 +1,68 @@
+# Home -> team: the games bottom sheet shows "< Home", the centred team name and the games table,
+# loads older seasons on scroll, and closes via "< Home" or system back.
+appId: com.voidx.nba
+name: home_game_sheet
+tags:
+  - smoke
+  - network
+  - home
+  - game
+---
+- runFlow: common/cooldown.yaml
+- runFlow: common/launch_home.yaml
+
+- tapOn: "Boston Celtics"
+- extendedWaitUntil:
+    visible: "< Home"
+    timeout: 10000
+- runFlow:
+    file: common/await_content.yaml
+    env:
+      CONTENT: "Visitor"
+# The title is the only "Boston Celtics" above the column headers (rows repeat the name below them).
+- assertVisible:
+    text: "Boston Celtics"
+    above:
+      text: "Visitor"
+    rightOf:
+      text: "< Home"
+- assertVisible: "Score"
+- assertVisible:
+    text: "Home"
+    leftOf:
+      text: "Visitor"
+
+# Endless scroll: the current season is short, so reaching its end requests the previous season (1 request).
+- repeat:
+    times: 4
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 25%
+          duration: 300
+- assertNotVisible: "Too many requests.*"
+- assertNotVisible: "Something went wrong.*"
+- assertNotVisible: "No games found for this team."
+- assertVisible: "Boston Celtics"
+- assertVisible: "< Home"
+
+# Close with the header button.
+- tapOn: "< Home"
+- extendedWaitUntil:
+    notVisible: "< Home"
+    timeout: 5000
+- assertVisible: "Atlanta Hawks"
+- assertVisible: "Players"
+
+# Reopen and close with system back.
+- tapOn: "Boston Celtics"
+- runFlow:
+    file: common/await_content.yaml
+    env:
+      CONTENT: "Visitor"
+- assertVisible: "< Home"
+- back
+- extendedWaitUntil:
+    notVisible: "< Home"
+    timeout: 5000
+- assertVisible: "Atlanta Hawks"

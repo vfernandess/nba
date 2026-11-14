@@ -1,0 +1,20 @@
+# Wait for ${CONTENT} (a text regex) to appear after a request. If the API answers 429 instead (the app shows
+# its rate-limited state), wait for the quota window to pass and tap Retry once. Any other error fails.
+appId: com.voidx.nba
+---
+- extendedWaitUntil:
+    visible: "${CONTENT}|Too many requests. Wait a moment and retry."
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "Too many requests. Wait a moment and retry."
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "maestro-cooldown-never-visible"
+          timeout: 65000
+          optional: true
+      - tapOn: "Retry"
+      - extendedWaitUntil:
+          visible: "${CONTENT}"
+          timeout: 30000

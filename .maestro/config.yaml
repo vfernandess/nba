@@ -1,0 +1,12 @@
+# Maestro workspace config: `maestro test .maestro/` runs every top-level flow in this order.
+# Sub-flows in common/ are only reached through runFlow.
+flows:
+  - "*"
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - home_sort
+    - home_game_sheet
+    - players_search
+    - tab_state
+    - offline_retry
