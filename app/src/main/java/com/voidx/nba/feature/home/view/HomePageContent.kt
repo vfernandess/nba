@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -16,6 +17,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,7 +66,7 @@ fun HomePageContent(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) { teams ->
-            TeamTable(teams = teams, onTeamClick = onTeamClick)
+            TeamTable(teams = teams, sort = state.sort, onTeamClick = onTeamClick)
         }
     }
 }
@@ -93,9 +99,20 @@ private fun HomeTopBar(
 @Composable
 private fun TeamTable(
     teams: List<Team>,
+    sort: TeamSort,
     onTeamClick: (Team) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+    // Saveable so neither the first composition nor returning to the tab scrolls; only a new sort does.
+    var scrolledForSort by rememberSaveable { mutableStateOf(sort) }
+    LaunchedEffect(sort) {
+        if (sort != scrolledForSort) {
+            scrolledForSort = sort
+            listState.scrollToItem(0)
+        }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         TableHeader(
             titles = listOf(
@@ -105,7 +122,7 @@ private fun TeamTable(
             ),
             weights = TableWeights,
         )
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
             items(items = teams, key = { it.id }) { team ->
                 TableRow(
                     cells = listOf(team.fullName, team.city, team.conference),
