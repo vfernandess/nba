@@ -56,7 +56,8 @@ abstract class GameReducer : SimpleReducer<GameState, GameEffect>(GameState()) {
 
         private fun pageGames(state: GameState, effect: GameEffect.ShowPage) =
             if (effect.append) {
-                (state.content as? ContentState.Success)?.data.orEmpty() + effect.games
+                // distinctBy: a duplicated page must never crash the list's `key = { it.id }`.
+                ((state.content as? ContentState.Success)?.data.orEmpty() + effect.games).distinctBy { it.id }
             } else {
                 effect.games
             }

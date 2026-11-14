@@ -2,10 +2,10 @@
 <resources>
     <string name="game_back_home">&lt; Home</string>
     <string name="game_back_players">&lt; Players</string>
-    <string name="game_header_home_name">Home Name</string>
-    <string name="game_header_home_score">Home Score</string>
-    <string name="game_header_visitor_name">Visitor Name</string>
-    <string name="game_header_visitor_score">Visitor Score</string>
+    <string name="game_header_home_name">Home</string>
+    <string name="game_header_home_score">Score</string>
+    <string name="game_header_visitor_name">Visitor</string>
+    <string name="game_header_visitor_score">Score</string>
     <string name="game_empty">No games found for this team.</string>
     <string name="game_score_pending">–</string>
 </resources>

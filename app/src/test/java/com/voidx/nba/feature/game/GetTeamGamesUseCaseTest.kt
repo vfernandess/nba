@@ -72,6 +72,7 @@ class GetTeamGamesUseCaseTest {
             listOf(GameEffect.LoadingMore, GameEffect.ShowPage(emptyList(), null, true)),
             effects,
         )
+        assertEquals(3, repo.calls.size)
     }
 
     @Test
@@ -84,13 +85,61 @@ class GetTeamGamesUseCaseTest {
     }
 
     @Test
-    fun cursorWithEmptyPage_doesNotWalkBackAndMovesToPreviousSeason() = runTest {
-        val repo = FakeGameRepository(mapOf((2025 to 30) to Page(emptyList(), null)))
+    fun emptyCursorPage_advancesToPreviousSeasonInSameWalk() = runTest {
+        // e.g. a 101-game season: page 2 can come back empty after the cursor; the walk must not stall on it.
+        val repo = FakeGameRepository(mapOf((2024 to null) to Page(games, null)))
 
         val effects = useCase(repo)(14, GameCursor(2025, 30), append = true).toList()
 
         assertEquals(
-            listOf(GameEffect.LoadingMore, GameEffect.ShowPage(emptyList(), GameCursor(2024), true)),
+            listOf(GameEffect.LoadingMore, GameEffect.ShowPage(games, GameCursor(2023), true)),
+            effects,
+        )
+        assertEquals(listOf(2025 to 30, 2024 to null), repo.calls.map { it.season to it.cursor })
+    }
+
+    @Test
+    fun emptyCursorPage_withNextCursor_followsCursorInSameSeason() = runTest {
+        val repo = FakeGameRepository(
+            mapOf(
+                (2025 to 30) to Page(emptyList(), 60),
+                (2025 to 60) to Page(games, null),
+            ),
+        )
+
+        val effects = useCase(repo)(14, GameCursor(2025, 30), append = true).toList()
+
+        assertEquals(
+            listOf(GameEffect.LoadingMore, GameEffect.ShowPage(games, GameCursor(2024), true)),
+            effects,
+        )
+        assertEquals(listOf(2025 to 30, 2025 to 60), repo.calls.map { it.season to it.cursor })
+    }
+
+    @Test
+    fun emptyCursorPage_thenThreeEmptySeasons_endsWithNoNext() = runTest {
+        val repo = FakeGameRepository()
+
+        val effects = useCase(repo)(14, GameCursor(2025, 30), append = true).toList()
+
+        assertEquals(
+            listOf(GameEffect.LoadingMore, GameEffect.ShowPage(emptyList(), null, true)),
+            effects,
+        )
+        assertEquals(
+            listOf(2025 to 30, 2024 to null, 2023 to null, 2022 to null),
+            repo.calls.map { it.season to it.cursor },
+        )
+    }
+
+    @Test
+    fun emptyCursorPage_inFirstSeason_endsWithNoNext() = runTest {
+        val repo = FakeGameRepository()
+
+        val effects = useCase(repo)(14, GameCursor(1946, 30), append = true).toList()
+
+        assertEquals(
+            listOf(GameEffect.LoadingMore, GameEffect.ShowPage(emptyList(), null, true)),
             effects,
         )
         assertEquals(1, repo.calls.size)

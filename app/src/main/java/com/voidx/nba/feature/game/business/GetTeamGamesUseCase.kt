@@ -42,7 +42,13 @@ interface GetTeamGamesUseCase {
                     cursor = GameCursor(cursor.season - 1, null, cursor.emptySeasonsInARow + 1)
                     continue
                 }
-                emit(GameEffect.ShowPage(page.items, nextCursorAfter(cursor, page), append))
+                val next = nextCursorAfter(cursor, page)
+                if (page.items.isEmpty() && next != null) {
+                    // A later page of a season came back empty: keep walking rather than append nothing.
+                    cursor = next
+                    continue
+                }
+                emit(GameEffect.ShowPage(page.items, next, append))
                 return@flow
             }
         }

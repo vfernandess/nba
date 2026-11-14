@@ -5,7 +5,6 @@ import com.voidx.nba.core.ui.ContentState
 import com.voidx.nba.core.ui.EmptyReason
 import com.voidx.nba.feature.game.presentation.GameCursor
 import com.voidx.nba.feature.game.presentation.GameEffect
-import com.voidx.nba.feature.game.GameOrigin
 import com.voidx.nba.feature.game.presentation.GameReducer
 import com.voidx.nba.feature.game.presentation.GameState
 import org.junit.Assert.assertEquals
@@ -70,6 +69,15 @@ class GameReducerTest {
         assertEquals(ContentState.Success(g1 + g2), state.content)
         assertEquals(GameCursor(2025), state.next)
         assertFalse(state.isLoadingMore)
+    }
+
+    @Test
+    fun showPage_withAppend_dropsGamesAlreadyShown() {
+        val previous = GameState(content = ContentState.Success(g1 + g2), isLoadingMore = true)
+
+        val state = reduce(GameEffect.ShowPage(g2 + listOf(game(3)), GameCursor(2024), append = true), previous)
+
+        assertEquals(ContentState.Success(g1 + g2 + listOf(game(3))), state.content)
     }
 
     @Test

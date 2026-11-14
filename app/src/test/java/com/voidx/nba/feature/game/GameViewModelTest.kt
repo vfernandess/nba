@@ -8,7 +8,6 @@ import com.voidx.nba.feature.game.business.GameViewModel
 import com.voidx.nba.feature.game.business.GetTeamGamesUseCase
 import com.voidx.nba.feature.game.presentation.GameCursor
 import com.voidx.nba.feature.game.presentation.GameInteractor
-import com.voidx.nba.feature.game.GameOrigin
 import com.voidx.nba.feature.game.presentation.GameReducer
 import com.voidx.nba.testutil.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi

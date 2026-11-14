@@ -4,8 +4,8 @@ import com.voidx.nba.core.fuse.Interactor
 import com.voidx.nba.feature.game.business.CurrentSeason
 import com.voidx.nba.feature.game.business.GetTeamGamesUseCase
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
