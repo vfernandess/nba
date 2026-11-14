@@ -47,6 +47,32 @@ and the app shows an "API key missing" error.
 
 Requirements: Android SDK with the NDK and CMake installed, minSdk 29.
 
+### UI tests (Maestro)
+
+End-to-end flows live in `.maestro/` and run against the real balldontlie API:
+
+| Flow | Covers |
+|---|---|
+| `home_sort` | Sort pill and dialog (Name / City / Conference), table order, scroll back to top on a new sort |
+| `home_game_sheet` | Team games sheet: header, games table, load-more on scroll, close via `< Home` and system back |
+| `players_search` | Empty-query prompt, search for "james", player games sheet with `< Players` |
+| `tab_state` | Switching tabs keeps the Home scroll position and the Players query and results |
+| `offline_retry` | Airplane mode shows the network error, Retry recovers once back online |
+
+Prerequisites: the [Maestro CLI](https://maestro.dev), one running emulator or connected device, and an
+API key set up as described in [Setup](#setup) (it is baked into the build).
+
+```sh
+./gradlew installDebug && maestro test .maestro/   # whole suite, in the order set in .maestro/config.yaml
+maestro test .maestro/players_search.yaml           # a single flow
+maestro test --include-tags smoke .maestro/         # home_sort, home_game_sheet, players_search
+```
+
+The free API tier allows 5 requests per minute and each flow spends 1–5, so every flow starts with a
+60 s cooldown (the full suite takes about 12 minutes). Pass `-e COOLDOWN_SECONDS=0` to skip it when
+the quota is known to be fresh. If a request still gets a 429, the flow waits for the quota window and
+taps Retry once. `offline_retry` switches airplane mode on and always switches it off again at the end.
+
 ## Architecture
 
 ### FUSE (Flow Unified State Effect)
