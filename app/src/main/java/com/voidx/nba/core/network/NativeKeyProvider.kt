@@ -5,6 +5,18 @@ import javax.inject.Singleton
 
 @Singleton
 class NativeKeyProvider @Inject constructor() : KeyProvider {
-    override fun apiKey(): String = ""
-    override fun baseUrl(): String = "https://api.balldontlie.io/v1/"
+
+    override fun apiKey(): String = nativeApiKey()
+
+    override fun baseUrl(): String = nativeBaseUrl()
+
+    private external fun nativeApiKey(): String
+
+    private external fun nativeBaseUrl(): String
+
+    private companion object {
+        init {
+            System.loadLibrary("keys")
+        }
+    }
 }
