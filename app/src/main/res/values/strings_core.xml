@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_network">No connection. Check your internet and try again.</string>
+    <string name="error_rate_limited">Too many requests. Wait a moment and retry.</string>
+    <string name="error_unauthorized">The API key was rejected.</string>
+    <string name="error_missing_api_key">API key missing — see README.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    <string name="action_retry">Retry</string>
+</resources>
