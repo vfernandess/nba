@@ -6,6 +6,7 @@ import com.voidx.nba.domain.model.Page
 import com.voidx.nba.feature.game.business.CurrentSeason
 import com.voidx.nba.feature.game.business.GameViewModel
 import com.voidx.nba.feature.game.business.GetTeamGamesUseCase
+import com.voidx.nba.feature.game.business.Today
 import com.voidx.nba.feature.game.presentation.GameCursor
 import com.voidx.nba.feature.game.presentation.GameInteractor
 import com.voidx.nba.feature.game.presentation.GameReducer
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GameViewModelTest {
@@ -29,7 +31,7 @@ class GameViewModelTest {
         savedStateHandle = handle,
         reducer = GameReducer.Impl(),
         interactor = GameInteractor.Impl(
-            getTeamGamesUseCase = GetTeamGamesUseCase.Impl(repository),
+            getTeamGamesUseCase = GetTeamGamesUseCase.Impl(repository, Today { LocalDate.of(2026, 11, 16) }),
             currentSeason = object : CurrentSeason {
                 override fun invoke(): Int = 2026
             },
@@ -39,7 +41,7 @@ class GameViewModelTest {
 
     @Test
     fun init_readsTeamFromSavedStateAndLoadsGames() = runTest(rule.dispatcher) {
-        val repo = FakeGameRepository(mapOf((2026 to null) to Page(games, 9)))
+        val repo = FakeGameRepository(mapOf((2026 to null) to Page(games, null)))
         val handle = SavedStateHandle(
             mapOf("teamId" to 14, "teamName" to "Atlanta Hawks", "origin" to "Player"),
         )
@@ -52,7 +54,7 @@ class GameViewModelTest {
         assertEquals("Atlanta Hawks", state.teamName)
         assertEquals(GameOrigin.Player, state.origin)
         assertEquals(ContentState.Success(games), state.content)
-        assertEquals(GameCursor(2026, 9), state.next)
+        assertEquals(GameCursor(2025), state.next)
         assertEquals(14, repo.calls.single().teamId)
     }
 }

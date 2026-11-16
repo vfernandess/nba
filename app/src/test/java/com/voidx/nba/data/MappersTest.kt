@@ -12,6 +12,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 
 class MappersTest {
 
@@ -20,6 +21,7 @@ class MappersTest {
 
     private fun game(status: String) = GameDto(
         id = 9,
+        date = "2026-11-14",
         status = status,
         homeTeamScore = 110,
         visitorTeamScore = 100,
@@ -36,6 +38,19 @@ class MappersTest {
         assertEquals("Boston Celtics", game.visitorTeamName)
         assertEquals(110, game.homeTeamScore)
         assertEquals(100, game.visitorTeamScore)
+        assertEquals(LocalDate.of(2026, 11, 14), game.date)
+    }
+
+    @Test
+    fun timestampDate_keepsTheDatePart() {
+        val game = game("Final").copy(date = "2018-10-16T00:00:00.000Z").toDomain()
+
+        assertEquals(LocalDate.of(2018, 10, 16), game.date)
+    }
+
+    @Test
+    fun unparseableDate_fallsBackToMin() {
+        assertEquals(LocalDate.MIN, game("Final").copy(date = "").toDomain().date)
     }
 
     @Test

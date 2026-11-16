@@ -16,6 +16,7 @@ import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
+import java.time.LocalDate
 import javax.inject.Inject
 
 class BallDontLieApi @Inject constructor(
@@ -26,12 +27,19 @@ class BallDontLieApi @Inject constructor(
         client.get("teams").body()
     }
 
-    suspend fun games(teamId: Int, season: Int, cursor: Int?, perPage: Int): PageDto<GameDto> = safeCall {
+    suspend fun games(
+        teamId: Int,
+        season: Int,
+        cursor: Int?,
+        perPage: Int,
+        endDate: LocalDate,
+    ): PageDto<GameDto> = safeCall {
         client.get("games") {
             parameter("team_ids[]", teamId)
             parameter("seasons[]", season)
             cursor?.let { parameter("cursor", it) }
             parameter("per_page", perPage)
+            parameter("end_date", endDate.toString())
         }.body()
     }
 

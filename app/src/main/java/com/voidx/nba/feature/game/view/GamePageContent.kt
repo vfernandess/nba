@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,8 +34,8 @@ import com.voidx.nba.core.ui.TableHeader
 import com.voidx.nba.core.ui.TableRow
 import com.voidx.nba.core.ui.theme.NBATheme
 import com.voidx.nba.domain.model.Game
-import com.voidx.nba.feature.game.GameOrigin
 import com.voidx.nba.feature.game.presentation.GameState
+import java.time.LocalDate
 
 private val ColumnWeights = listOf(0.32f, 0.18f, 0.32f, 0.18f)
 
@@ -45,7 +48,7 @@ fun GamePageContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        GameHeader(teamName = state.teamName, origin = state.origin, onBack = onBack)
+        GameHeader(teamName = state.teamName, onClose = onBack)
         StateContent(
             state = state.content,
             onRetry = onRetry,
@@ -62,19 +65,15 @@ fun GamePageContent(
 }
 
 @Composable
-private fun GameHeader(teamName: String, origin: GameOrigin, onBack: () -> Unit) {
+private fun GameHeader(teamName: String, onClose: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        TextButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
-            Text(
-                stringResource(
-                    if (origin == GameOrigin.Player) R.string.game_back_players else R.string.game_back_home
-                )
-            )
+        IconButton(onClick = onClose, modifier = Modifier.align(Alignment.CenterStart)) {
+            Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.game_close))
         }
         Text(
             text = teamName,
@@ -82,7 +81,7 @@ private fun GameHeader(teamName: String, origin: GameOrigin, onBack: () -> Unit)
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 96.dp),
+            modifier = Modifier.padding(horizontal = 56.dp),
         )
     }
 }
@@ -106,6 +105,7 @@ private fun GameList(
                 stringResource(R.string.game_header_visitor_score),
             ),
             weights = ColumnWeights,
+            maxLines = 2,
         )
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
             items(games, key = { it.id }) { game ->
@@ -119,6 +119,7 @@ private fun GameList(
                     ),
                     weights = ColumnWeights,
                     onClick = null,
+                    maxLines = 2,
                 )
             }
             item {
@@ -133,15 +134,14 @@ private fun GameList(
 }
 
 private val PreviewGames = listOf(
-    Game(1, "Atlanta Hawks", 112, "Boston Celtics", 108, isFinal = true),
-    Game(2, "Boston Celtics", 0, "Atlanta Hawks", 0, isFinal = false),
-    Game(3, "Atlanta Hawks", 99, "Miami Heat", 101, isFinal = true),
+    Game(1, LocalDate.of(2026, 11, 14), "Atlanta Hawks", 112, "Boston Celtics", 108, isFinal = true),
+    Game(2, LocalDate.of(2026, 11, 13), "Boston Celtics", 0, "Atlanta Hawks", 0, isFinal = false),
+    Game(3, LocalDate.of(2026, 11, 12), "Atlanta Hawks", 99, "Miami Heat", 101, isFinal = true),
 )
 
 private val PreviewState = GameState(
     teamId = 1,
     teamName = "Atlanta Hawks",
-    origin = GameOrigin.Home,
     content = ContentState.Success(PreviewGames),
 )
 
@@ -163,7 +163,7 @@ private fun GamePageContentLoadingPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun GamePageContentEmptyPreview() {
-    PreviewHost(PreviewState.copy(content = ContentState.Empty(EmptyReason.NoData), origin = GameOrigin.Player))
+    PreviewHost(PreviewState.copy(content = ContentState.Empty(EmptyReason.NoData)))
 }
 
 @Preview(showBackground = true)

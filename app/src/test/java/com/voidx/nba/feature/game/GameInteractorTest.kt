@@ -56,15 +56,15 @@ class GameInteractorTest {
 
     @Test
     fun loadMore_usesStoredCursorWithAppend() = runTest {
-        val effects = interactor(baseState.copy(next = GameCursor(2025, 30)), GameCommand.LoadMore).toList()
+        val effects = interactor(baseState.copy(next = GameCursor(2025)), GameCommand.LoadMore).toList()
 
         assertEquals(listOf(GameEffect.Loading), effects)
-        assertEquals(listOf(RecordingUseCase.Call(14, GameCursor(2025, 30), true)), useCase.calls)
+        assertEquals(listOf(RecordingUseCase.Call(14, GameCursor(2025), true)), useCase.calls)
     }
 
     @Test
     fun loadMore_ignoredWhileLoadingMore() = runTest {
-        val state = baseState.copy(next = GameCursor(2025, 30), isLoadingMore = true)
+        val state = baseState.copy(next = GameCursor(2025), isLoadingMore = true)
 
         val effects = interactor(state, GameCommand.LoadMore).toList()
 
@@ -82,7 +82,7 @@ class GameInteractorTest {
 
     @Test
     fun loadMore_afterLoadMoreError_isAllowedAgain() = runTest {
-        val state = baseState.copy(next = GameCursor(2025, 30), loadMoreError = AppError.Network)
+        val state = baseState.copy(next = GameCursor(2025), loadMoreError = AppError.Network)
 
         interactor(state, GameCommand.LoadMore).toList()
 

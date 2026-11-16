@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.LocalDate
 
 class RepositoryImplTest {
 
@@ -28,18 +29,25 @@ class RepositoryImplTest {
     private val team = """{"id":1,"conference":"East","city":"Atlanta","full_name":"Atlanta Hawks","name":"Hawks",""" +
         """"abbreviation":"ATL","division":"Southeast"}"""
 
-    private fun game(id: Int) = """{"id":$id,"status":"Final","season":2026,"home_team_score":100,""" +
+    private fun game(id: Int) = """{"id":$id,"date":"2026-11-14","status":"Final","season":2026,"home_team_score":100,""" +
         """"visitor_team_score":90,"home_team":$team,"visitor_team":$team}"""
 
     @Test
     fun gameRepository_mapsPage() = runTest {
         val body = """{"data":[${game(1)},${game(2)}],"meta":{"next_cursor":77,"per_page":100}}"""
 
-        val page = GameRepositoryImpl(api(body)).getGames(teamId = 1, season = 2026, cursor = null, perPage = 100)
+        val page = GameRepositoryImpl(api(body)).getGames(
+            teamId = 1,
+            season = 2026,
+            cursor = null,
+            perPage = 100,
+            endDate = LocalDate.of(2026, 11, 16),
+        )
 
         assertEquals(2, page.items.size)
         assertEquals(77, page.nextCursor)
         assertEquals(true, page.items.first().isFinal)
+        assertEquals(LocalDate.of(2026, 11, 14), page.items.first().date)
     }
 
     @Test

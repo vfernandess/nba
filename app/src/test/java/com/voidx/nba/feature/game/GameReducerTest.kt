@@ -53,10 +53,10 @@ class GameReducerTest {
 
     @Test
     fun showPage_withoutAppend_replacesGamesAndStoresNext() {
-        val state = reduce(GameEffect.ShowPage(g1, GameCursor(2026, 9), append = false))
+        val state = reduce(GameEffect.ShowPage(g1, GameCursor(2026), append = false))
 
         assertEquals(ContentState.Success(g1), state.content)
-        assertEquals(GameCursor(2026, 9), state.next)
+        assertEquals(GameCursor(2026), state.next)
         assertFalse(state.isLoadingMore)
     }
 

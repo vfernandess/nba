@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GameDto(
     val id: Int,
+    val date: String = "",
     val status: String = "",
     val season: Int = 0,
     @SerialName("home_team_score") val homeTeamScore: Int = 0,

@@ -4,11 +4,15 @@ A small NBA browser for Android (TGLab take-home). Two tabs, Home (teams) and Pl
 (search), share one bottom sheet that lists a team's games.
 
 - **Home**: a table of the 30 current teams (name, city, conference). The "Name" pill in the top
-  bar opens a sort dialog (Name, City, Conference). Tapping a team opens its games.
+  bar opens a sort dialog (Name, City, Conference). Name sorts by the team name ("76ers",
+  "Bucks", "Bulls"…): every full name starts with the city, so sorting by full name would just
+  repeat the City order. Tapping a team opens its games.
 - **Players**: search by first or last name, with paged results. Tapping a player opens their
   team's games.
-- **Team games sheet**: header with "< Home" or "< Players" and the team name, a table of home
-  team, home score, visitor team and visitor score, newest games first, with endless scroll.
+- **Team games sheet**: header with a close (✕) button and the team name, a table of Home Name,
+  Home Score, Visitor Name and Visitor Score, newest games first, with endless scroll. The mockup
+  shows a "< Home" back link; a close button was chosen instead because the screen is a sheet laid
+  over the list, not a pushed page. Long team names wrap to two lines as in the mockup.
 
 Stack: Kotlin, Jetpack Compose + Material 3, Hilt, Navigation Compose (type-safe routes), Ktor,
 kotlinx.serialization, Coroutines/Flow, NDK (API key), JUnit4 + Turbine.
@@ -54,8 +58,8 @@ End-to-end flows live in `.maestro/` and run against the real balldontlie API:
 | Flow | Covers |
 |---|---|
 | `home_sort` | Sort pill and dialog (Name / City / Conference), table order, scroll back to top on a new sort |
-| `home_game_sheet` | Team games sheet: header, games table, load-more on scroll, close via `< Home` and system back |
-| `players_search` | Empty-query prompt, search for "james", player games sheet with `< Players` |
+| `home_game_sheet` | Team games sheet: header, games table, load-more on scroll, close via the Close button and system back |
+| `players_search` | Empty-query prompt, search for "james", player games sheet closed with Close |
 | `tab_state` | Switching tabs keeps the Home scroll position and the Players query and results |
 | `offline_retry` | Airplane mode shows the network error, Retry recovers once back online |
 
@@ -159,14 +163,16 @@ that delegates to a stateless, previewable `XxxPageContent`.
   interactor ignores `LoadMore` while a page is loading or after the end. Paging 3 would keep
   list state outside the reducer, which would split the single source of truth that FUSE
   provides and make the paging logic harder to test.
-- **Newest season first, walking back.** The games endpoint can't sort by date. The sheet starts
-  at the current season (the current year from October onward, otherwise the previous year) and
-  follows `next_cursor` to the end of that season. Then it moves to the season before, and so on.
-  A season with no games, or an empty later page of a season, is skipped within the same load,
-  so a short or empty page never stalls the endless scroll. Paging stops at 1946 or **after 3
+- **Newest game first, one season per load.** The games endpoint returns games oldest first and
+  can't sort. So each load fetches a whole season (following `next_cursor`; 100 per page means one
+  request, or two for a long playoff run; capped at 3), passes `end_date=today` so unplayed fixtures don't bury the
+  latest results, and sorts it newest first. The sheet starts at the current season (the current
+  year from October onward, otherwise the previous year); scrolling to the end loads the season
+  before, and so on. A season with no games is skipped within the same load, so an empty season
+  never stalls the endless scroll. Paging stops at 1946 or **after 3
   empty seasons in a row**, so a 1990s expansion team doesn't spend about 50 requests walking
   back to 1946. Three empty seasons still tolerates gaps such as Charlotte's 2002–2004 hiatus.
-  Games are fetched 100 per page. Games not yet played show "–" instead of 0–0.
+  A game scheduled for today but not finished shows "–" instead of 0–0.
 - **Debounce through cancellable dispatch.** Each search is dispatched with a shared
   `cancelKey`. The interactor waits 400 ms before calling the API, and a newer keystroke cancels
   the pending job. The same cancellation means a slow older response can never overwrite a newer
@@ -177,7 +183,9 @@ that delegates to a stateless, previewable `XxxPageContent`.
   retries 429 and 5xx responses up to 2 times with exponential backoff, and never retries
   exceptions. Those retries wait only about 2 s and then 4 s, so they rarely help against a
   per-minute limit; once they are used up, the app shows a distinct "rate limited" error with
-  Retry.
+  Retry. Early in a season (roughly October to late November) the current season has too few
+  games to fill the sheet, so opening a team also loads the previous season: 2–3 requests instead
+  of 1. Opening several teams within a minute can then reach the rate limit sooner.
 - **Scope.** No images, offline cache, analytics or multi-module split. Tests are JVM unit tests
   of reducers, use cases, interactors and ViewModels (Turbine, fakes, no mocking library), plus
   the data layer against Ktor's `MockEngine`. One instrumented test checks the native key

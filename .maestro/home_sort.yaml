@@ -15,8 +15,15 @@ tags:
     text: "Name"
     above:
       text: "City"
-- assertVisible: "Atlanta Hawks"
-- assertVisible: "Golden State Warriors"
+# Name sorts by team name (76ers, Bucks, Bulls…), not by the city the full name starts with.
+- assertVisible:
+    text: "Philadelphia 76ers"
+    above:
+      text: "Milwaukee Bucks"
+- assertVisible:
+    text: "Milwaukee Bucks"
+    above:
+      text: "Chicago Bulls"
 
 # City
 - tapOn:
@@ -79,7 +86,7 @@ tags:
 - assertNotVisible: "Golden State Warriors"
 - assertNotVisible: "Dallas Mavericks"
 
-# Back to Name: West teams are interleaved alphabetically again.
+# Back to Name: West teams are interleaved by team name again.
 - tapOn:
     text: "Conference"
     above:
@@ -94,6 +101,9 @@ tags:
       above:
         text: "City"
     timeout: 5000
-- assertVisible: "Atlanta Hawks"
-- assertVisible: "Dallas Mavericks"
-- assertVisible: "Golden State Warriors"
+- assertVisible:
+    text: "Philadelphia 76ers"
+    above:
+      text: "Milwaukee Bucks"
+- assertVisible: "LA Clippers"
+- assertVisible: "Memphis Grizzlies"

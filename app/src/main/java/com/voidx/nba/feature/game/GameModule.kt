@@ -2,6 +2,7 @@ package com.voidx.nba.feature.game
 
 import com.voidx.nba.feature.game.business.CurrentSeason
 import com.voidx.nba.feature.game.business.GetTeamGamesUseCase
+import com.voidx.nba.feature.game.business.Today
 import com.voidx.nba.feature.game.presentation.GameInteractor
 import com.voidx.nba.feature.game.presentation.GameReducer
 import dagger.Binds
@@ -24,4 +25,7 @@ abstract class GameModule {
 
     @Binds
     abstract fun bindsCurrentSeason(currentSeason: CurrentSeason.Impl): CurrentSeason
+
+    @Binds
+    abstract fun bindsToday(today: Today.Impl): Today
 }

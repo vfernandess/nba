@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import java.io.IOException
+import java.time.LocalDate
 
 class BallDontLieApiTest {
 
@@ -37,7 +38,7 @@ class BallDontLieApiTest {
         respond("""{"data":[]}""", HttpStatusCode.OK, jsonHeaders)
 
     @Test
-    fun games_sendsTeamSeasonCursorAndAuth() = runTest {
+    fun games_sendsTeamSeasonCursorEndDateAndAuth() = runTest {
         var captured: HttpRequestData? = null
         val engine = MockEngine { request ->
             captured = request
@@ -46,7 +47,7 @@ class BallDontLieApiTest {
         val keys = FakeKeyProvider(apiKey = "k")
         val api = BallDontLieApi(HttpClientFactory.create(engine, keys, debug = false), keys)
 
-        api.games(teamId = 14, season = 2026, cursor = 50, perPage = 100)
+        api.games(teamId = 14, season = 2026, cursor = 50, perPage = 100, endDate = LocalDate.of(2026, 11, 16))
 
         val request = requireNotNull(captured)
         assertEquals("/v1/games", request.url.encodedPath)
@@ -55,6 +56,7 @@ class BallDontLieApiTest {
         assertEquals("2026", params["seasons[]"])
         assertEquals("50", params["cursor"])
         assertEquals("100", params["per_page"])
+        assertEquals("2026-11-16", params["end_date"])
         assertEquals("k", request.headers[HttpHeaders.Authorization])
     }
 

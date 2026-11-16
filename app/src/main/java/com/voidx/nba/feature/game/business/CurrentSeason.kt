@@ -11,7 +11,7 @@ interface CurrentSeason {
 
     operator fun invoke(): Int
 
-    class Impl @Inject constructor() : CurrentSeason {
-        override fun invoke(): Int = seasonFor(LocalDate.now())
+    class Impl @Inject constructor(private val today: Today) : CurrentSeason {
+        override fun invoke(): Int = seasonFor(today())
     }
 }

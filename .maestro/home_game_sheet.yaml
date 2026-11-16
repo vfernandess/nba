@@ -1,5 +1,5 @@
-# Home -> team: the games bottom sheet shows "< Home", the centred team name and the games table,
-# loads older seasons on scroll, and closes via "< Home" or system back.
+# Home -> team: the games bottom sheet shows a Close button, the centred team name and the games table,
+# loads older seasons on scroll, and closes via Close or system back.
 appId: com.voidx.nba
 name: home_game_sheet
 tags:
@@ -13,26 +13,28 @@ tags:
 
 - tapOn: "Boston Celtics"
 - extendedWaitUntil:
-    visible: "< Home"
+    visible: "Close"
     timeout: 10000
 - runFlow:
     file: common/await_content.yaml
     env:
-      CONTENT: "Visitor"
+      CONTENT: "Visitor Name"
 # The title is the only "Boston Celtics" above the column headers (rows repeat the name below them).
 - assertVisible:
     text: "Boston Celtics"
     above:
-      text: "Visitor"
+      text: "Visitor Name"
     rightOf:
-      text: "< Home"
-- assertVisible: "Score"
+      text: "Close"
+- assertVisible: "Home Score"
+- assertVisible: "Visitor Score"
 - assertVisible:
-    text: "Home"
+    text: "Home Name"
     leftOf:
-      text: "Visitor"
+      text: "Visitor Name"
 
-# Endless scroll: the current season is short, so reaching its end requests the previous season (1 request).
+# Endless scroll: early in a season the current season can't fill the sheet, so the previous season usually
+# loads on open; these swipes reach its end and may fetch one more season (1–2 requests).
 - repeat:
     times: 4
     commands:
@@ -44,12 +46,12 @@ tags:
 - assertNotVisible: "Something went wrong.*"
 - assertNotVisible: "No games found for this team."
 - assertVisible: "Boston Celtics"
-- assertVisible: "< Home"
+- assertVisible: "Close"
 
 # Close with the header button.
-- tapOn: "< Home"
+- tapOn: "Close"
 - extendedWaitUntil:
-    notVisible: "< Home"
+    notVisible: "Close"
     timeout: 5000
 - assertVisible: "Atlanta Hawks"
 - assertVisible: "Players"
@@ -59,10 +61,10 @@ tags:
 - runFlow:
     file: common/await_content.yaml
     env:
-      CONTENT: "Visitor"
-- assertVisible: "< Home"
+      CONTENT: "Visitor Name"
+- assertVisible: "Close"
 - back
 - extendedWaitUntil:
-    notVisible: "< Home"
+    notVisible: "Close"
     timeout: 5000
 - assertVisible: "Atlanta Hawks"

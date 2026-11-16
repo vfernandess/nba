@@ -24,6 +24,7 @@ fun TableHeader(
     titles: List<String>,
     weights: List<Float>,
     modifier: Modifier = Modifier,
+    maxLines: Int = 1,
 ) {
     require(titles.size == weights.size) {
         "titles (${titles.size}) and weights (${weights.size}) must have the same size"
@@ -40,7 +41,7 @@ fun TableHeader(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
+                    maxLines = maxLines,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(weights[index]),
                 )
@@ -56,6 +57,7 @@ fun TableRow(
     weights: List<Float>,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    maxLines: Int = 1,
 ) {
     require(cells.size == weights.size) {
         "cells (${cells.size}) and weights (${weights.size}) must have the same size"
@@ -73,7 +75,7 @@ fun TableRow(
                 Text(
                     text = cell,
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
+                    maxLines = maxLines,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(weights[index]),
                 )

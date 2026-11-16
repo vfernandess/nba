@@ -47,11 +47,12 @@ class SortTeamsUseCaseTest {
 
     @Test
     fun invoke_isCaseInsensitive() {
-        val lowerCase = Team(id = 99, fullName = "atlanta Zephyrs", name = "Zephyrs", city = "atlanta", conference = "east")
+        val lowerCase = Team(id = 99, fullName = "atlanta Bobcats", name = "bobcats", city = "atlanta", conference = "east")
         val teams = listOf(celtics, lowerCase, hawks)
 
-        assertEquals(listOf(hawks, lowerCase, celtics), useCase(teams, TeamSort.City))
-        assertEquals(listOf(celtics, hawks, lowerCase), useCase(teams, TeamSort.Name))
-        assertEquals(listOf(celtics, hawks, lowerCase), useCase(teams, TeamSort.Conference))
+        // A case-sensitive compare would put every capitalised value before "atlanta", "bobcats" and "east".
+        assertEquals(listOf(lowerCase, hawks, celtics), useCase(teams, TeamSort.City))
+        assertEquals(listOf(lowerCase, celtics, hawks), useCase(teams, TeamSort.Name))
+        assertEquals(listOf(lowerCase, celtics, hawks), useCase(teams, TeamSort.Conference))
     }
 }
