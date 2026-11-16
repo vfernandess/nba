@@ -2,11 +2,10 @@ package com.voidx.nba.feature.game.presentation
 
 import com.voidx.nba.core.common.AppError
 import com.voidx.nba.domain.model.Game
-import com.voidx.nba.feature.game.GameOrigin
 
 sealed class GameEffect {
 
-    data class Started(val teamId: Int, val teamName: String, val origin: GameOrigin) : GameEffect()
+    data class Started(val teamId: Int, val teamName: String) : GameEffect()
 
     data object Loading : GameEffect()
 

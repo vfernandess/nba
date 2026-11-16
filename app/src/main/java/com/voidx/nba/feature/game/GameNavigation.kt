@@ -7,10 +7,9 @@ import androidx.navigation.compose.dialog
 import com.voidx.nba.feature.game.view.GamePage
 import kotlinx.serialization.Serializable
 
-enum class GameOrigin { Home, Player }
 
 @Serializable
-data class GameRoute(val teamId: Int, val teamName: String, val origin: String)
+data class GameRoute(val teamId: Int, val teamName: String)
 
 fun NavGraphBuilder.gameSheet(onDismiss: () -> Unit) {
     dialog<GameRoute>(
@@ -23,8 +22,8 @@ fun NavGraphBuilder.gameSheet(onDismiss: () -> Unit) {
     }
 }
 
-fun NavController.navigateToGame(teamId: Int, teamName: String, origin: GameOrigin) {
-    navigate(GameRoute(teamId, teamName, origin.name)) {
+fun NavController.navigateToGame(teamId: Int, teamName: String) {
+    navigate(GameRoute(teamId, teamName)) {
         launchSingleTop = true
     }
 }

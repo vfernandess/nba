@@ -2,7 +2,6 @@ package com.voidx.nba.feature.game.business
 
 import androidx.lifecycle.SavedStateHandle
 import com.voidx.nba.core.fuse.EffectViewModel
-import com.voidx.nba.feature.game.GameOrigin
 import com.voidx.nba.feature.game.presentation.GameCommand
 import com.voidx.nba.feature.game.presentation.GameEffect
 import com.voidx.nba.feature.game.presentation.GameInteractor
@@ -29,7 +28,6 @@ class GameViewModel @Inject constructor(
             GameCommand.Start(
                 teamId = checkNotNull(savedStateHandle["teamId"]),
                 teamName = checkNotNull(savedStateHandle["teamName"]),
-                origin = GameOrigin.valueOf(checkNotNull(savedStateHandle["origin"])),
             )
         )
     }

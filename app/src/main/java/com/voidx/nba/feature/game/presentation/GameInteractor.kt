@@ -19,7 +19,7 @@ interface GameInteractor : Interactor<GameState, GameCommand, GameEffect> {
         override suspend fun invoke(state: GameState, command: GameCommand): Flow<GameEffect> =
             when (command) {
                 is GameCommand.Start -> flow {
-                    emit(GameEffect.Started(command.teamId, command.teamName, command.origin))
+                    emit(GameEffect.Started(command.teamId, command.teamName))
                     emitAll(firstPage(command.teamId))
                 }
 

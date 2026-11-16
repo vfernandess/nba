@@ -43,7 +43,7 @@ class GameViewModelTest {
     fun init_readsTeamFromSavedStateAndLoadsGames() = runTest(rule.dispatcher) {
         val repo = FakeGameRepository(mapOf((2026 to null) to Page(games, null)))
         val handle = SavedStateHandle(
-            mapOf("teamId" to 14, "teamName" to "Atlanta Hawks", "origin" to "Player"),
+            mapOf("teamId" to 14, "teamName" to "Atlanta Hawks"),
         )
 
         val vm = viewModel(handle, repo)
@@ -52,7 +52,6 @@ class GameViewModelTest {
         val state = vm.state.value
         assertEquals(14, state.teamId)
         assertEquals("Atlanta Hawks", state.teamName)
-        assertEquals(GameOrigin.Player, state.origin)
         assertEquals(ContentState.Success(games), state.content)
         assertEquals(GameCursor(2025), state.next)
         assertEquals(14, repo.calls.single().teamId)

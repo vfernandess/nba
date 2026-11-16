@@ -23,11 +23,10 @@ class GameReducerTest {
 
     @Test
     fun started_setsTeamFields() {
-        val state = reduce(GameEffect.Started(14, "Atlanta Hawks", GameOrigin.Player))
+        val state = reduce(GameEffect.Started(14, "Atlanta Hawks"))
 
         assertEquals(14, state.teamId)
         assertEquals("Atlanta Hawks", state.teamName)
-        assertEquals(GameOrigin.Player, state.origin)
     }
 
     @Test

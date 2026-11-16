@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.voidx.nba.feature.game.GameOrigin
 import com.voidx.nba.feature.game.GameRoute
 import com.voidx.nba.feature.game.gameSheet
 import com.voidx.nba.feature.game.navigateToGame
@@ -20,10 +19,10 @@ fun RootNavigation(navController: NavHostController, modifier: Modifier = Modifi
         modifier = modifier,
     ) {
         homePage { teamId, teamName ->
-            navController.navigateToGame(teamId, teamName, GameOrigin.Home)
+            navController.navigateToGame(teamId, teamName)
         }
         playerPage { teamId, teamName ->
-            navController.navigateToGame(teamId, teamName, GameOrigin.Player)
+            navController.navigateToGame(teamId, teamName)
         }
         // Pops only the sheet: a repeated dismiss (e.g. double tap) is a no-op
         // instead of popping the tab underneath.

@@ -14,7 +14,6 @@ abstract class GameReducer : SimpleReducer<GameState, GameEffect>(GameState()) {
                 is GameEffect.Started -> currentState.copy(
                     teamId = effect.teamId,
                     teamName = effect.teamName,
-                    origin = effect.origin,
                 )
 
                 GameEffect.Loading -> currentState.copy(

@@ -139,7 +139,7 @@ Dependencies point one way: `feature -> domain <- data`. Every package can use `
 never import each other. Each feature exposes a `@Serializable` route,
 `NavGraphBuilder.xxxPage(...)` and `NavController.navigateToXxx(...)`, and
 `app/RootNavigation` connects them. The games sheet is a dialog destination that hosts a
-`ModalBottomSheet`. Its ViewModel reads `teamId`, `teamName` and `origin` from the
+`ModalBottomSheet`. Its ViewModel reads `teamId` and `teamName` from the
 `SavedStateHandle`. Tab switches use `popUpTo(start) { saveState = true }`, `launchSingleTop` and
 `restoreState`, so each tab keeps its list and scroll position.
 

@@ -34,14 +34,14 @@ class GameInteractorTest {
 
     private val useCase = RecordingUseCase()
     private val interactor = GameInteractor.Impl(useCase, FixedSeason())
-    private val baseState = GameState(teamId = 14, teamName = "Atlanta Hawks", origin = GameOrigin.Player)
+    private val baseState = GameState(teamId = 14, teamName = "Atlanta Hawks")
 
     @Test
     fun start_emitsStartedThenLoadsFromCurrentSeason() = runTest {
-        val effects = interactor(GameState(), GameCommand.Start(14, "Atlanta Hawks", GameOrigin.Player)).toList()
+        val effects = interactor(GameState(), GameCommand.Start(14, "Atlanta Hawks")).toList()
 
         assertEquals(
-            listOf(GameEffect.Started(14, "Atlanta Hawks", GameOrigin.Player), GameEffect.Loading),
+            listOf(GameEffect.Started(14, "Atlanta Hawks"), GameEffect.Loading),
             effects,
         )
         assertEquals(listOf(RecordingUseCase.Call(14, GameCursor(2026), false)), useCase.calls)
