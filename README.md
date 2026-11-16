@@ -1,6 +1,6 @@
 # NBA
 
-A small NBA browser for Android (TGLab take-home). Two tabs, Home (teams) and Players
+A small NBA browser for Android. Two tabs, Home (teams) and Players
 (search), share one bottom sheet that lists a team's games.
 
 - **Home**: a table of the 30 current teams (name, city, conference). The "Name" pill in the top
@@ -146,47 +146,3 @@ never import each other. Each feature exposes a `@Serializable` route,
 Inside a feature: `business/` holds the use cases and the ViewModel, `presentation/` holds the
 Command, Effect, SideEffect, State, Interactor and Reducer, and `view/` holds a stateful `XxxPage`
 that delegates to a stateless, previewable `XxxPageContent`.
-
-## Decisions and trade-offs
-
-- **API migration.** The `www.balldontlie.io/api/v1/...` URLs in the brief now return 404. The
-  app uses `https://api.balldontlie.io/v1/` with an `Authorization: <key>` header (no "Bearer"),
-  which needs a free key. `GET teams` also returns historical franchises with a blank
-  conference. These are filtered out, so Home shows the 30 current teams.
-- **The NDK obscures the key. It doesn't secure it.** Gradle passes the key to CMake, which
-  compiles it into `libkeys.so`, and `NativeKeyProvider` reads it over JNI. This keeps the key out
-  of git, `BuildConfig` and plain-text resources, and makes casual extraction harder. Anyone with
-  the APK and a few minutes can still recover it. A real product would proxy requests through
-  its own backend. Nothing reads `local.properties` at runtime.
-- **Manual paging instead of Paging 3.** Players and games use cursor paging inside FUSE. State
-  holds `items`, `nextCursor`, `isLoadingMore`, `endReached` and `loadMoreError`, and the
-  interactor ignores `LoadMore` while a page is loading or after the end. Paging 3 would keep
-  list state outside the reducer, which would split the single source of truth that FUSE
-  provides and make the paging logic harder to test.
-- **Newest game first, one season per load.** The games endpoint returns games oldest first and
-  can't sort. So each load fetches a whole season (following `next_cursor`; 100 per page means one
-  request, or two for a long playoff run; capped at 3), passes `end_date=today` so unplayed fixtures don't bury the
-  latest results, and sorts it newest first. The sheet starts at the current season (the current
-  year from October onward, otherwise the previous year); scrolling to the end loads the season
-  before, and so on. A season with no games is skipped within the same load, so an empty season
-  never stalls the endless scroll. Paging stops at 1946 or **after 3
-  empty seasons in a row**, so a 1990s expansion team doesn't spend about 50 requests walking
-  back to 1946. Three empty seasons still tolerates gaps such as Charlotte's 2002–2004 hiatus.
-  A game scheduled for today but not finished shows "–" instead of 0–0.
-- **Debounce through cancellable dispatch.** Each search is dispatched with a shared
-  `cancelKey`. The interactor waits 400 ms before calling the API, and a newer keystroke cancels
-  the pending job. The same cancellation means a slow older response can never overwrite a newer
-  one. Queries shorter than 2 characters show a prompt and make no request.
-- **5 requests per minute.** The free tier allows about 5 requests per minute. The app makes
-  few calls: one request for all teams, loads from the ViewModel's `init` (so returning to a tab
-  doesn't refetch), the search debounce, the 2-character minimum and 100 games per page. Ktor
-  retries 429 and 5xx responses up to 2 times with exponential backoff, and never retries
-  exceptions. Those retries wait only about 2 s and then 4 s, so they rarely help against a
-  per-minute limit; once they are used up, the app shows a distinct "rate limited" error with
-  Retry. Early in a season (roughly October to late November) the current season has too few
-  games to fill the sheet, so opening a team also loads the previous season: 2–3 requests instead
-  of 1. Opening several teams within a minute can then reach the rate limit sooner.
-- **Scope.** No images, offline cache, analytics or multi-module split. Tests are JVM unit tests
-  of reducers, use cases, interactors and ViewModels (Turbine, fakes, no mocking library), plus
-  the data layer against Ktor's `MockEngine`. One instrumented test checks the native key
-  provider.
