@@ -14,6 +14,7 @@ private const val STATUS_FINAL = "Final"
 fun TeamDto.toDomain(): Team = Team(
     id = id,
     fullName = fullName,
+    name = name,
     city = city,
     conference = conference,
 )

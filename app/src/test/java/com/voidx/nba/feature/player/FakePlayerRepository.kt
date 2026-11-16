@@ -24,5 +24,5 @@ fun testPlayer(id: Int, firstName: String = "First$id", lastName: String = "Last
     id = id,
     firstName = firstName,
     lastName = lastName,
-    team = Team(id = 10 + id, fullName = "Team ${10 + id}", city = "City", conference = "East"),
+    team = Team(id = 10 + id, fullName = "Team ${10 + id}", name = "${10 + id}", city = "City", conference = "East"),
 )

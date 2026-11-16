@@ -135,9 +135,9 @@ private fun TeamTable(
 }
 
 private val previewTeams = listOf(
-    Team(id = 1, fullName = "Atlanta Hawks", city = "Atlanta", conference = "East"),
-    Team(id = 2, fullName = "Boston Celtics", city = "Boston", conference = "East"),
-    Team(id = 14, fullName = "Los Angeles Lakers", city = "Los Angeles", conference = "West"),
+    Team(id = 1, fullName = "Atlanta Hawks", name = "Hawks", city = "Atlanta", conference = "East"),
+    Team(id = 2, fullName = "Boston Celtics", name = "Celtics", city = "Boston", conference = "East"),
+    Team(id = 14, fullName = "Los Angeles Lakers", name = "Lakers", city = "Los Angeles", conference = "West"),
 )
 
 @Composable

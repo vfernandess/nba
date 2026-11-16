@@ -33,7 +33,7 @@ class GetTeamsUseCaseTest {
 
     @Test
     fun invoke_filtersTeamsWithBlankConference() = runTest {
-        val noConference = Team(id = 50, fullName = "All-Stars", city = "Nowhere", conference = " ")
+        val noConference = Team(id = 50, fullName = "All-Stars", name = "Stars", city = "Nowhere", conference = " ")
         repository.teams = listOf(noConference, hawks)
 
         useCase(TeamSort.Name).test {
@@ -45,7 +45,7 @@ class GetTeamsUseCaseTest {
 
     @Test
     fun invoke_whenAllFiltered_emitsShowEmpty() = runTest {
-        repository.teams = listOf(Team(id = 50, fullName = "All-Stars", city = "Nowhere", conference = " "))
+        repository.teams = listOf(Team(id = 50, fullName = "All-Stars", name = "Stars", city = "Nowhere", conference = " "))
 
         useCase(TeamSort.Name).test {
             assertEquals(HomeEffect.Loading, awaitItem())

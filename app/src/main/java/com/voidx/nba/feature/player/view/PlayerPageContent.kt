@@ -127,9 +127,9 @@ private fun PlayerList(
 }
 
 private val PreviewPlayers = listOf(
-    Player(1, "LeBron", "James", Team(14, "Los Angeles Lakers", "Los Angeles", "West")),
-    Player(2, "Stephen", "Curry", Team(10, "Golden State Warriors", "Golden State", "West")),
-    Player(3, "Jayson", "Tatum", Team(2, "Boston Celtics", "Boston", "East")),
+    Player(1, "LeBron", "James", Team(14, "Los Angeles Lakers", "Lakers", "Los Angeles", "West")),
+    Player(2, "Stephen", "Curry", Team(10, "Golden State Warriors", "Warriors", "Golden State", "West")),
+    Player(3, "Jayson", "Tatum", Team(2, "Boston Celtics", "Celtics", "Boston", "East")),
 )
 
 @Composable

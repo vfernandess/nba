@@ -15,7 +15,7 @@ import org.junit.Test
 
 class MappersTest {
 
-    private val hawks = TeamDto(id = 1, conference = "East", city = "Atlanta", fullName = "Atlanta Hawks")
+    private val hawks = TeamDto(id = 1, conference = "East", city = "Atlanta", name = "Hawks", fullName = "Atlanta Hawks")
     private val celtics = TeamDto(id = 2, conference = "East", city = "Boston", fullName = "Boston Celtics")
 
     private fun game(status: String) = GameDto(
@@ -46,6 +46,8 @@ class MappersTest {
     @Test
     fun team_mapsFields() {
         val team = hawks.toDomain()
+
+        assertEquals("Hawks", team.name)
 
         assertEquals(1, team.id)
         assertEquals("Atlanta Hawks", team.fullName)

@@ -4,6 +4,7 @@ import com.voidx.nba.domain.model.Team
 import com.voidx.nba.domain.model.TeamSort
 import com.voidx.nba.feature.home.business.SortTeamsUseCase
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class SortTeamsUseCaseTest {
@@ -11,13 +12,19 @@ class SortTeamsUseCaseTest {
     private val useCase: SortTeamsUseCase = SortTeamsUseCase.Impl()
 
     @Test
-    fun invoke_byName_ordersByFullName() {
+    fun invoke_byName_ordersByTeamNameNotCity() {
         val result = useCase(unsortedTeams, TeamSort.Name)
 
         assertEquals(
-            listOf("Atlanta Hawks", "Boston Celtics", "Chicago Bulls", "Los Angeles Lakers"),
+            listOf("Chicago Bulls", "Boston Celtics", "Atlanta Hawks", "Los Angeles Lakers"),
             result.map { it.fullName },
         )
+    }
+
+    @Test
+    fun invoke_nameAndCityGiveDifferentOrders() {
+        // NBA full names start with the city, so sorting by full name would equal sorting by city.
+        assertNotEquals(useCase(unsortedTeams, TeamSort.Name), useCase(unsortedTeams, TeamSort.City))
     }
 
     @Test
@@ -32,7 +39,7 @@ class SortTeamsUseCaseTest {
         val result = useCase(unsortedTeams, TeamSort.Conference)
 
         assertEquals(
-            listOf("Atlanta Hawks", "Boston Celtics", "Chicago Bulls", "Los Angeles Lakers"),
+            listOf("Chicago Bulls", "Boston Celtics", "Atlanta Hawks", "Los Angeles Lakers"),
             result.map { it.fullName },
         )
         assertEquals(listOf("East", "East", "East", "West"), result.map { it.conference })
@@ -40,11 +47,11 @@ class SortTeamsUseCaseTest {
 
     @Test
     fun invoke_isCaseInsensitive() {
-        val lowerCase = Team(id = 99, fullName = "atlanta Zephyrs", city = "atlanta", conference = "east")
+        val lowerCase = Team(id = 99, fullName = "atlanta Zephyrs", name = "Zephyrs", city = "atlanta", conference = "east")
         val teams = listOf(celtics, lowerCase, hawks)
 
         assertEquals(listOf(hawks, lowerCase, celtics), useCase(teams, TeamSort.City))
-        assertEquals(listOf(hawks, lowerCase, celtics), useCase(teams, TeamSort.Name))
-        assertEquals(listOf(hawks, lowerCase, celtics), useCase(teams, TeamSort.Conference))
+        assertEquals(listOf(celtics, hawks, lowerCase), useCase(teams, TeamSort.Name))
+        assertEquals(listOf(celtics, hawks, lowerCase), useCase(teams, TeamSort.Conference))
     }
 }

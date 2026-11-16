@@ -10,7 +10,9 @@ interface SortTeamsUseCase {
 
     class Impl @Inject constructor() : SortTeamsUseCase {
 
-        private val byName = compareBy<Team, String>(String.CASE_INSENSITIVE_ORDER) { it.fullName }
+        // Full names start with the city ("Atlanta Hawks"), so sorting them would just repeat the City sort.
+        private val byName = compareBy<Team, String>(String.CASE_INSENSITIVE_ORDER) { it.name }
+            .thenBy(String.CASE_INSENSITIVE_ORDER) { it.fullName }
 
         override fun invoke(teams: List<Team>, sort: TeamSort): List<Team> {
             val comparator = when (sort) {
